@@ -1,5 +1,10 @@
-package main
+package bot
 
-func Init() error {
-	return nil
-}
+import (
+	"github.com/vitaliy-ukiru/fsm-telebot"
+)
+
+var (
+	ansAdminSG = fsm.NewStateGroup("ansAd")
+	ID_ADMINSG = ansAdminSG.New("ID_ADMIN")
+)

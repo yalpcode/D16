@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"log"
@@ -7,48 +7,19 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/vitaliy-ukiru/fsm-telebot"
+	"github.com/vitaliy-ukiru/fsm-telebot/storages/memory"
 	tele "gopkg.in/telebot.v3"
 )
 
 var channel_id int64
 
 func start(c tele.Context) error {
-	return c.Send("Hello!")
+	text := "Здравствуйте, <b>" + c.Chat().FirstName + "</b>! Я бот-помощник по каналу!\nВы можете увидеть мой функционал используя '/' или во вкладке 'меню'."
+	return c.Send(text)
 }
 
-func answerAdmin(c tele.Context) error {
-	bot := c.Bot()
-
-	channel, err := bot.ChatByID(channel_id)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	admins, err := bot.AdminsOf(channel)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	selector := &tele.ReplyMarkup{}
-	rows := make([]tele.Row, 0)
-
-	for _, admin := range admins {
-		admin_id := strconv.FormatInt(admin.User.ID, 10)
-		rows = append(rows, selector.Row(selector.Data(admin.User.FirstName, "ad", admin_id)))
-	}
-
-	selector.Inline(
-		rows...,
-	)
-
-	return c.Send("Выберите кому хотите задать вопрос:", selector)
-}
-
-// func sendAnswerAdmin(c tele.Context) error {
-// 	c.Data()
-// }
-
-func init() {
+func Init() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
@@ -60,8 +31,9 @@ func init() {
 	}
 
 	pref := tele.Settings{
-		Token:  os.Getenv("TOKEN"),
-		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+		Token:     os.Getenv("TOKEN"),
+		Poller:    &tele.LongPoller{Timeout: 10 * time.Second},
+		ParseMode: tele.ModeHTML,
 	}
 
 	b, err := tele.NewBot(pref)
@@ -70,9 +42,15 @@ func init() {
 		return
 	}
 
+	storage := memory.NewStorage()
+	defer storage.Close()
+
+	manager := fsm.NewManager(b, nil, storage, nil)
+
 	b.Handle("/start", start)
 	b.Handle("/answer_admin", answerAdmin)
-	// b.Handle(tele.OnQuery)
+	manager.Bind(tele.OnCallback, fsm.DefaultState, selectAdmin)
+	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
 
 	b.Start()
 }

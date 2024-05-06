@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/PhoenixIIexe/D16"
+	"github.com/PhoenixIIexe/D16/bot"
 )
 
 func main() {
-	D16.Start()
+	bot.Init()
 }
