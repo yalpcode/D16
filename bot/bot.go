@@ -51,6 +51,8 @@ func Init() {
 		deleter_markup.Row(btnDelete),
 	)
 
+	b.Use(CheckSubscription())
+
 	b.Handle("/start", start)
 	b.Handle("/answer_admin", answerAdmin)
 	manager.Bind(tele.OnCallback, fsm.DefaultState, OnCallbackF)
