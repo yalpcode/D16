@@ -47,10 +47,15 @@ func Init() {
 
 	manager := fsm.NewManager(b, nil, storage, nil)
 
+	deleter_markup.Inline(
+		deleter_markup.Row(btnDelete),
+	)
+
 	b.Handle("/start", start)
 	b.Handle("/answer_admin", answerAdmin)
-	manager.Bind(tele.OnCallback, fsm.DefaultState, selectAdmin)
+	manager.Bind(tele.OnCallback, fsm.DefaultState, OnCallbackF)
 	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
+	b.Handle(&btnDelete, deleteAnsMsg)
 
 	b.Start()
 }

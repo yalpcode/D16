@@ -4,10 +4,13 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/vitaliy-ukiru/fsm-telebot"
 	tele "gopkg.in/telebot.v3"
 )
+
+var queueMsg sync.Map
 
 func answerAdmin(c tele.Context) error {
 	bot := c.Bot()
@@ -47,6 +50,12 @@ func selectAdmin(c tele.Context, state fsm.Context) error {
 }
 
 func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
+	v, ok := queueMsg.Load(c.Chat().ID)
+	if ok && v != nil {
+		go state.Finish(true)
+		return c.Send("Вы уже отправляли сообщение! Подождите ответа")
+	}
+
 	var id_admin_s string
 	state.MustGet("ID_ADMIN", &id_admin_s)
 	go state.Finish(true)
@@ -66,7 +75,15 @@ func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
 	bot.Send(
 		chat_admin,
 		"Анонимный вопрос: "+c.Text(),
+		deleter_markup,
 	)
 
+	go queueMsg.Store(c.Chat().ID, true)
+
 	return c.Send("Сообщение отправлено")
+}
+
+func deleteAnsMsg(c tele.Context) error {
+	go queueMsg.Delete(c.Chat().ID)
+	return c.Delete()
 }
