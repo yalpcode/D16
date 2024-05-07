@@ -46,7 +46,7 @@ func selectAdmin(c tele.Context, state fsm.Context) error {
 	go state.Update("ID_ADMIN", strings.Split(c.Data(), "|")[1])
 	go state.Set(ID_ADMINSG)
 
-	return c.Send("Введите сообщение для админа (Анонимно): ")
+	return c.Send("Введите сообщение для админа (Анонимно):\n<b>ОТВЕТ БУДЕТ В КАНАЛЕ</b>")
 }
 
 func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
