@@ -54,10 +54,13 @@ func Init() {
 	b.Use(CheckSubscription())
 
 	b.Handle("/start", start)
+
 	b.Handle("/answer_admin", answerAdmin)
 	manager.Bind(tele.OnCallback, fsm.DefaultState, OnCallbackF)
 	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
 	b.Handle(&btnDelete, deleteAnsMsg)
+
+	// b.Handle(tele.OnText, sendAnonComment, CheckPost())
 
 	b.Start()
 }

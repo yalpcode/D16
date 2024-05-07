@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/vitaliy-ukiru/fsm-telebot"
@@ -24,6 +25,18 @@ func CheckSubscription() tele.MiddlewareFunc {
 				return nil
 			}
 			return next(c)
+		}
+	}
+}
+
+func CheckPost() tele.MiddlewareFunc {
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			fmt.Println(c.Message().IsReply())
+			if c.Message().IsReply() && c.Message().ReplyTo.Chat.ID == channel_id {
+				return next(c)
+			}
+			return nil
 		}
 	}
 }

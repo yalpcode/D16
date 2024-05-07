@@ -5,12 +5,30 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/vitaliy-ukiru/fsm-telebot"
 	tele "gopkg.in/telebot.v3"
 )
 
-var queueMsg sync.Map
+var QueueAns *TTLMap = NewTTLMap(30 * time.Second)
+
+type TTLMap struct {
+	data       sync.Map
+	expiration time.Duration
+}
+
+func NewTTLMap(expiration time.Duration) *TTLMap {
+	return &TTLMap{
+		data:       sync.Map{},
+		expiration: expiration,
+	}
+}
+
+func (m *TTLMap) Set(key, value interface{}) {
+	m.data.Store(key, value)
+	time.AfterFunc(m.expiration, func() { m.data.Delete(key) })
+}
 
 func answerAdmin(c tele.Context) error {
 	bot := c.Bot()
@@ -50,7 +68,7 @@ func selectAdmin(c tele.Context, state fsm.Context) error {
 }
 
 func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
-	v, ok := queueMsg.Load(c.Chat().ID)
+	v, ok := QueueAns.data.Load(c.Chat().ID)
 	if ok && v != nil {
 		go state.Finish(true)
 		return c.Send("Вы уже отправляли сообщение! Подождите ответа")
@@ -78,12 +96,12 @@ func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
 		deleter_markup,
 	)
 
-	go queueMsg.Store(c.Chat().ID, true)
+	QueueAns.Set(c.Chat().ID, true)
 
 	return c.Send("Сообщение отправлено")
 }
 
 func deleteAnsMsg(c tele.Context) error {
-	go queueMsg.Delete(c.Chat().ID)
+	QueueAns.data.Delete(c.Chat().ID)
 	return c.Delete()
 }
