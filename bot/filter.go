@@ -19,7 +19,7 @@ func CheckSubscription() tele.MiddlewareFunc {
 			if err != nil {
 				return err
 			}
-			if member.Role == "kicked" || member.Role == "left" {
+			if member.Role == "kicked" || member.Role == "left" || c.Sender().IsBot {
 				return nil
 			}
 			return next(c)

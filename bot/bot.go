@@ -68,7 +68,7 @@ func Init() {
 	b.Handle(&btnDelete, deleteAnsMsg)
 	manager.Bind(tele.OnText, fsm.DefaultState, getAnsAdmin, CheckAnsAdmin())
 
-	manager.Bind(tele.OnText, fsm.DefaultState, sendAnonComment, CheckPost())
+	manager.Bind(tele.OnText, fsm.AnyState, sendAnonComment, CheckPost())
 	manager.Bind(tele.OnText, IS_CHANNELSG, anonComment)
 
 	b.Start()
