@@ -33,9 +33,18 @@ func anonComment(c tele.Context, state fsm.Context) error {
 
 	messageN := &tele.Message{ID: message_id, Chat: chat, Text: c.Text()}
 
-	_, err = bot.Send(chat, c.Text(), &tele.SendOptions{ReplyTo: messageN})
-	if err != nil {
-		log.Fatal(err)
+	if c.Message().Photo != nil {
+		photo := c.Message().Photo
+		photo.Caption = c.Message().Caption
+		_, err = photo.Send(bot, chat, &tele.SendOptions{ReplyTo: messageN})
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		_, err = bot.Send(chat, c.Text(), &tele.SendOptions{ReplyTo: messageN})
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return err

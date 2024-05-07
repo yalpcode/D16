@@ -71,6 +71,7 @@ func Init() {
 	manager.Bind(tele.OnPhoto, fsm.DefaultState, FilterPhoto)
 
 	manager.Bind(tele.OnText, fsm.DefaultState, FilterText)
+	manager.Handle(fsm.F(tele.OnPhoto, IS_CHANNELSG), anonComment)
 	manager.Handle(fsm.F(tele.OnText, IS_CHANNELSG), anonComment)
 
 	b.Start()
