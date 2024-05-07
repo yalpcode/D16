@@ -71,7 +71,7 @@ func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
 	v, ok := QueueAns.data.Load(c.Chat().ID)
 	if ok && v != nil {
 		go state.Finish(true)
-		return c.Send("Вы уже отправляли сообщение! Подождите ответа")
+		return c.Send("Вы уже отправляли сообщение! Подождите ответа или 30 секунд")
 	}
 
 	var id_admin_s string

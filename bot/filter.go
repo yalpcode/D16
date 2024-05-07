@@ -1,10 +1,8 @@
 package bot
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/vitaliy-ukiru/fsm-telebot"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -32,8 +30,7 @@ func CheckSubscription() tele.MiddlewareFunc {
 func CheckPost() tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
-			fmt.Println(c.Message().IsReply())
-			if c.Message().IsReply() && c.Message().ReplyTo.Chat.ID == channel_id {
+			if !c.Sender().IsBot && strings.HasPrefix(c.Text(), "https://t.me/c/"+chat_link) {
 				return next(c)
 			}
 			return nil
@@ -41,12 +38,13 @@ func CheckPost() tele.MiddlewareFunc {
 	}
 }
 
-func OnCallbackF(c tele.Context, state fsm.Context) error {
-	data := c.Data()
-
-	if strings.Contains(data, "ad") {
-		return selectAdmin(c, state)
+func CheckCallBack(pref string) tele.MiddlewareFunc {
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			if strings.Contains(c.Data(), pref) {
+				return next(c)
+			}
+			return nil
+		}
 	}
-
-	return nil
 }

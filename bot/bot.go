@@ -12,7 +12,8 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-var channel_id int64
+var channel_id, chat_id int64
+var chat_link string
 
 func start(c tele.Context) error {
 	text := "Здравствуйте, <b>" + c.Chat().FirstName + "</b>! Я бот-помощник по каналу!\nВы можете увидеть мой функционал используя '/' или во вкладке 'меню'."
@@ -26,6 +27,12 @@ func Init() {
 	}
 
 	channel_id, err = strconv.ParseInt(os.Getenv("CHANNEL"), 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	chat_link = os.Getenv("CHAT_LINK")
+	chat_id, err = strconv.ParseInt(os.Getenv("CHAT"), 10, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,11 +63,12 @@ func Init() {
 	b.Handle("/start", start)
 
 	b.Handle("/answer_admin", answerAdmin)
-	manager.Bind(tele.OnCallback, fsm.DefaultState, OnCallbackF)
+	manager.Bind(tele.OnCallback, fsm.AnyState, selectAdmin, CheckCallBack("ad"))
 	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
 	b.Handle(&btnDelete, deleteAnsMsg)
 
-	// b.Handle(tele.OnText, sendAnonComment, CheckPost())
+	manager.Bind(tele.OnText, fsm.DefaultState, sendAnonComment, CheckPost())
+	manager.Bind(tele.OnText, IS_CHANNELSG, anonComment)
 
 	b.Start()
 }
