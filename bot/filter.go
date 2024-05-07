@@ -38,11 +38,19 @@ func FilterCallBack(c tele.Context, state fsm.Context) error {
 }
 
 func FilterText(c tele.Context, state fsm.Context) error {
-	if c.Message().IsReply() && c.Message().ReplyTo.Sender.IsBot && strings.HasPrefix(c.Message().ReplyTo.Text, "Анонимный вопрос:") {
+	if c.Message().IsReply() && c.Message().ReplyTo.Sender.IsBot && (strings.HasPrefix(c.Message().ReplyTo.Text, "Анонимный вопрос:") || (c.Message().ReplyTo.Photo != nil && strings.HasPrefix(c.Message().ReplyTo.Caption, "Анонимный вопрос:"))) {
 		return getAnsAdmin(c, state)
 	}
 	if strings.HasPrefix(c.Text(), "https://t.me/c/"+chat_link) {
 		return sendAnonComment(c, state)
+	}
+
+	return nil
+}
+
+func FilterPhoto(c tele.Context, state fsm.Context) error {
+	if c.Message().IsReply() && c.Message().ReplyTo.Sender.IsBot && (strings.HasPrefix(c.Message().ReplyTo.Text, "Анонимный вопрос:") || (c.Message().Photo != nil && strings.HasPrefix(c.Message().ReplyTo.Caption, "Анонимный вопрос:"))) {
+		return getAnsAdmin(c, state)
 	}
 
 	return nil

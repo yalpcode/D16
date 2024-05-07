@@ -90,11 +90,17 @@ func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
 		log.Fatal(err)
 	}
 
-	bot.Send(
-		chat_admin,
-		"Анонимный вопрос: "+c.Text(),
-		deleter_markup,
-	)
+	if c.Message().Photo != nil {
+		photo := c.Message().Photo
+		photo.Caption = "Анонимный вопрос: " + c.Text()
+		photo.Send(bot, chat_admin, &tele.SendOptions{ReplyMarkup: deleter_markup})
+	} else {
+		bot.Send(
+			chat_admin,
+			"Анонимный вопрос: "+c.Text(),
+			deleter_markup,
+		)
+	}
 
 	QueueAns.Set(c.Chat().ID, true)
 
@@ -107,15 +113,42 @@ func deleteAnsMsg(c tele.Context) error {
 }
 
 func getAnsAdmin(c tele.Context, state fsm.Context) error {
+	QueueAns.data.Delete(c.Chat().ID)
+
 	bot := c.Bot()
+
 	channel, err := bot.ChatByID(channel_id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	text := c.Message().ReplyTo.Text + "\n\nОтвет: " + c.Text() + "\n\n" + c.Sender().FirstName
+	text := "\n\nОтвет: " + c.Text() + "\n\n" + c.Sender().FirstName
 
-	_, err = bot.Send(channel, text)
+	if c.Message().ReplyTo.Photo != nil && c.Message().Photo != nil {
+		photo := c.Message().Photo
+		photo.Caption = c.Message().ReplyTo.Caption + text
+		album := tele.Album{
+			c.Message().ReplyTo.Photo,
+			photo,
+		}
+
+		bot.SendAlbum(
+			channel,
+			album,
+		)
+	} else if c.Message().ReplyTo.Photo != nil {
+		photo := c.Message().ReplyTo.Photo
+		photo.Caption = c.Message().ReplyTo.Caption + text
+		photo.Send(bot, channel, &tele.SendOptions{})
+	} else if c.Message().Photo != nil {
+		photo := c.Message().Photo
+		photo.Caption = c.Message().ReplyTo.Text + text
+		photo.Send(bot, channel, &tele.SendOptions{})
+	} else {
+		_, err = bot.Send(channel, c.Message().ReplyTo.Text+text)
+	}
+
+	bot.Delete(c.Message().ReplyTo)
 
 	return err
 }

@@ -65,8 +65,10 @@ func Init() {
 	b.Handle("/answer_admin", answerAdmin)
 	manager.Bind(tele.OnCallback, fsm.DefaultState, FilterCallBack)
 	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
+	manager.Bind(tele.OnPhoto, ID_ADMINSG, inputAnswerAdmin)
 	b.Handle(&btnDelete, deleteAnsMsg)
 	manager.Bind(tele.OnText, fsm.DefaultState, FilterText)
+	manager.Bind(tele.OnPhoto, fsm.DefaultState, FilterPhoto)
 
 	manager.Bind(tele.OnText, fsm.DefaultState, FilterText)
 	manager.Handle(fsm.F(tele.OnText, IS_CHANNELSG), anonComment)
