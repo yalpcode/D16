@@ -63,13 +63,13 @@ func Init() {
 	b.Handle("/start", start)
 
 	b.Handle("/answer_admin", answerAdmin)
-	manager.Bind(tele.OnCallback, fsm.AnyState, selectAdmin, CheckCallBack("ad"))
+	manager.Bind(tele.OnCallback, fsm.DefaultState, FilterCallBack)
 	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
 	b.Handle(&btnDelete, deleteAnsMsg)
-	manager.Bind(tele.OnText, fsm.DefaultState, getAnsAdmin, CheckAnsAdmin())
+	manager.Bind(tele.OnText, fsm.DefaultState, FilterText)
 
-	manager.Bind(tele.OnText, fsm.AnyState, sendAnonComment, CheckPost())
-	manager.Bind(tele.OnText, IS_CHANNELSG, anonComment)
+	manager.Bind(tele.OnText, fsm.DefaultState, FilterText)
+	manager.Handle(fsm.F(tele.OnText, IS_CHANNELSG), anonComment)
 
 	b.Start()
 }
