@@ -66,6 +66,7 @@ func Init() {
 	manager.Bind(tele.OnCallback, fsm.AnyState, selectAdmin, CheckCallBack("ad"))
 	manager.Bind(tele.OnText, ID_ADMINSG, inputAnswerAdmin)
 	b.Handle(&btnDelete, deleteAnsMsg)
+	manager.Bind(tele.OnText, fsm.DefaultState, getAnsAdmin, CheckAnsAdmin())
 
 	manager.Bind(tele.OnText, fsm.DefaultState, sendAnonComment, CheckPost())
 	manager.Bind(tele.OnText, IS_CHANNELSG, anonComment)

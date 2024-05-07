@@ -105,3 +105,17 @@ func deleteAnsMsg(c tele.Context) error {
 	QueueAns.data.Delete(c.Chat().ID)
 	return c.Delete()
 }
+
+func getAnsAdmin(c tele.Context, state fsm.Context) error {
+	bot := c.Bot()
+	channel, err := bot.ChatByID(channel_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	text := c.Message().ReplyTo.Text + "\n\nОтвет: " + c.Text() + "\n\n" + c.Sender().FirstName
+
+	_, err = bot.Send(channel, text)
+
+	return err
+}

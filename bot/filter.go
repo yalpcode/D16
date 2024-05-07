@@ -38,6 +38,17 @@ func CheckPost() tele.MiddlewareFunc {
 	}
 }
 
+func CheckAnsAdmin() tele.MiddlewareFunc {
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			if c.Message().IsReply() && c.Message().ReplyTo.Sender.IsBot && strings.HasPrefix(c.Message().ReplyTo.Text, "Анонимный вопрос:") {
+				return next(c)
+			}
+			return nil
+		}
+	}
+}
+
 func CheckCallBack(pref string) tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
