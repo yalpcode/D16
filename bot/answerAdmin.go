@@ -112,7 +112,7 @@ func deleteAnsMsg(c tele.Context) error {
 	return c.Delete()
 }
 
-func getAnsAdmin(c tele.Context, state fsm.Context) error {
+func getAnsAdmin(c tele.Context, _ fsm.Context) error {
 	QueueAns.data.Delete(c.Chat().ID)
 
 	bot := c.Bot()
