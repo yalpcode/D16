@@ -92,12 +92,12 @@ func inputAnswerAdmin(c tele.Context, state fsm.Context) error {
 
 	if c.Message().Photo != nil {
 		photo := c.Message().Photo
-		photo.Caption = "Анонимный вопрос: " + c.Text()
+		photo.Caption = "Анонимный-вопрос: " + c.Text()
 		photo.Send(bot, chat_admin, &tele.SendOptions{ReplyMarkup: deleter_markup})
 	} else {
 		bot.Send(
 			chat_admin,
-			"Анонимный вопрос: "+c.Text(),
+			"Анонимный-вопрос: "+c.Text(),
 			deleter_markup,
 		)
 	}
@@ -126,7 +126,7 @@ func getAnsAdmin(c tele.Context, _ fsm.Context) error {
 
 	if c.Message().ReplyTo.Photo != nil && c.Message().Photo != nil {
 		photo := c.Message().Photo
-		photo.Caption = c.Message().ReplyTo.Caption + text
+		photo.Caption = "```" + c.Message().ReplyTo.Caption + "```" + text
 		album := tele.Album{
 			c.Message().ReplyTo.Photo,
 			photo,
@@ -135,17 +135,18 @@ func getAnsAdmin(c tele.Context, _ fsm.Context) error {
 		bot.SendAlbum(
 			channel,
 			album,
+			&tele.SendOptions{ParseMode: tele.ModeMarkdown},
 		)
 	} else if c.Message().ReplyTo.Photo != nil {
 		photo := c.Message().ReplyTo.Photo
-		photo.Caption = c.Message().ReplyTo.Caption + text
-		photo.Send(bot, channel, &tele.SendOptions{})
+		photo.Caption = "```" + c.Message().ReplyTo.Caption + "```" + text
+		photo.Send(bot, channel, &tele.SendOptions{ParseMode: tele.ModeMarkdown})
 	} else if c.Message().Photo != nil {
 		photo := c.Message().Photo
-		photo.Caption = c.Message().ReplyTo.Text + text
-		photo.Send(bot, channel, &tele.SendOptions{})
+		photo.Caption = "```" + c.Message().ReplyTo.Text + "```" + text
+		photo.Send(bot, channel, &tele.SendOptions{ParseMode: tele.ModeMarkdown})
 	} else {
-		_, err = bot.Send(channel, c.Message().ReplyTo.Text+text)
+		_, err = bot.Send(channel, "```"+c.Message().ReplyTo.Text+"```"+text, &tele.SendOptions{ParseMode: tele.ModeMarkdown})
 	}
 
 	bot.Delete(c.Message().ReplyTo)
