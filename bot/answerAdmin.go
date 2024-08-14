@@ -122,7 +122,7 @@ func getAnsAdmin(c tele.Context, _ fsm.Context) error {
 		log.Fatal(err)
 	}
 
-	text := "\n\nОтвет: " + c.Text() + "\n\n" + c.Sender().FirstName
+	text := "\n\n```Ответ: " + c.Text() + "```\n\n" + c.Sender().FirstName
 
 	if c.Message().ReplyTo.Photo != nil && c.Message().Photo != nil {
 		photo := c.Message().Photo
